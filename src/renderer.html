@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SSH Browser</title>
+  <link rel="stylesheet" href="styles/style.css">
+</head>
+<body>
+  <div class="app-container">
+    <header class="header">
+      <h1 class="logo">🛡️ MaskNet</h1>
+      <div id="connect-bar">
+        <input id="sshTarget" placeholder="user@host" />
+        <button onclick="connect()">Connect</button>
+      </div>
+      <div id="status" class="status-message"></div>
+    </header>
+
+    <main>
+      <iframe id="browser" src="about:blank"></iframe>
+    </main>
+  </div>
+
+  <!-- Password Modal -->
+  <div id="passwordModal" class="modal hidden">
+    <div class="modal-content">
+      <h2>SSH Password Required</h2>
+      <p id="modal-host-text">Enter password for:</p>
+      <input type="password" id="sshPasswordInput" placeholder="Your password" />
+      <div class="modal-buttons">
+        <button onclick="submitPassword()">Connect</button>
+        <button onclick="cancelPassword()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let passwordResolve;
+
+    function showPasswordModal(host) {
+      document.getElementById('modal-host-text').innerText = `Enter password for ${host}`;
+      document.getElementById('sshPasswordInput').value = '';
+      document.getElementById('passwordModal').classList.remove('hidden');
+
+      return new Promise((resolve) => {
+        passwordResolve = resolve;
+      });
+    }
+
+    function submitPassword() {
+      const pwd = document.getElementById('sshPasswordInput').value;
+      document.getElementById('passwordModal').classList.add('hidden');
+      passwordResolve(pwd);
+    }
+
+    function cancelPassword() {
+      document.getElementById('passwordModal').classList.add('hidden');
+      passwordResolve(null);
+    }
+
+    async function connect() {
+      const target = document.getElementById('sshTarget').value;
+      document.getElementById('status').innerText = 'Connecting...';
+
+      const result = await window.electronAPI.startSSHTunnel(target);
+      document.getElementById('status').innerText = result;
+
+      document.getElementById('browser').src = 'https://www.google.com';
+    }
+  </script>
+</body>
+</html>
