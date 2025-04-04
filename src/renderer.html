@@ -34,39 +34,98 @@
     </div>
   </div>
 
-  <script>
-    let passwordResolve;
+  <!-- Host Authenticity Modal -->
+  <div id="authenticityModal" class="modal hidden">
+    <div class="modal-content">
+      <h2>Host Authenticity Check</h2>
+      <p id="authenticity-message"></p>
+      <div class="modal-buttons">
+        <button onclick="confirmAuthenticity('yes')">Yes</button>
+        <button onclick="confirmAuthenticity('no')">No</button>
+      </div>
+    </div>
+  </div>
 
+  <!-- Error Modal -->
+  <div id="errorModal" class="modal hidden">
+    <div class="modal-content">
+      <h2>Error</h2>
+      <p id="error-message"></p>
+      <div class="modal-buttons">
+        <button onclick="closeErrorModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const { ipcRenderer } = require('electron'); // Import IPC Renderer for events
+  
+    let passwordResolve;
+    let authenticityResolve;
+  
+    // Password Modal
     function showPasswordModal(host) {
       document.getElementById('modal-host-text').innerText = `Enter password for ${host}`;
       document.getElementById('sshPasswordInput').value = '';
       document.getElementById('passwordModal').classList.remove('hidden');
-
+  
       return new Promise((resolve) => {
         passwordResolve = resolve;
       });
     }
-
+  
     function submitPassword() {
       const pwd = document.getElementById('sshPasswordInput').value;
       document.getElementById('passwordModal').classList.add('hidden');
       passwordResolve(pwd);
     }
-
+  
     function cancelPassword() {
       document.getElementById('passwordModal').classList.add('hidden');
       passwordResolve(null);
     }
-
+  
+    // Host Authenticity Modal
+    function showHostAuthenticityModal(host) {
+      document.getElementById('authenticity-message').innerText = `Are you sure you want to continue connecting to ${host}?`;
+      document.getElementById('authenticityModal').classList.remove('hidden');
+  
+      return new Promise((resolve) => {
+        authenticityResolve = resolve;
+      });
+    }
+  
+    function confirmAuthenticity(answer) {
+      document.getElementById('authenticityModal').classList.add('hidden');
+      authenticityResolve(answer);
+    }
+  
+    // Error Modal
+    function showErrorModal(message) {
+      document.getElementById('error-message').innerText = message;
+      document.getElementById('errorModal').classList.remove('hidden');
+    }
+  
+    function closeErrorModal() {
+      document.getElementById('errorModal').classList.add('hidden');
+    }
+  
     async function connect() {
       const target = document.getElementById('sshTarget').value;
       document.getElementById('status').innerText = 'Connecting...';
-
-      const result = await window.electronAPI.startSSHTunnel(target);
-      document.getElementById('status').innerText = result;
-
-      document.getElementById('browser').src = 'https://www.google.com';
+  
+      try {
+        const result = await ipcRenderer.invoke('start-ssh-tunnel', target);
+        document.getElementById('status').innerText = result;
+      } catch (error) {
+        document.getElementById('status').innerText = 'Failed to connect.';
+      }
     }
-  </script>
+  
+    // Listen for events to show modals
+    ipcRenderer.on('show-password-modal', (event, host) => showPasswordModal(host));
+    ipcRenderer.on('show-authenticity-modal', (event, host) => showHostAuthenticityModal(host));
+    ipcRenderer.on('show-error-modal', (event, message) => showErrorModal(message));
+  </script>  
 </body>
 </html>
