@@ -7,42 +7,69 @@ from PyQt5.QtWidgets import (
     QPushButton, QLineEdit, QLabel, QInputDialog, QHBoxLayout
 )
 from PyQt5.QtWebEngineWidgets import QWebEngineView
-from PyQt5.QtCore import QUrl, QTimer
+from PyQt5.QtCore import QUrl, QTimer, Qt
 
 
 class MaskNetApp(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("MaskNet - SSH SOCKS5 Browser")
-        self.setGeometry(100, 100, 800, 600)
+        self.setGeometry(100, 100, 1080, 720)
+
+        self.setStyleSheet("background-color: #f4f7fa;")
 
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
         self.layout = QVBoxLayout(self.central_widget)
-
+        self.layout.setContentsMargins(10, 20, 10, 10)
+        self.layout.setSpacing(5)
         self.logo = QLabel("🛡️ MaskNet", self)
+        self.logo.setStyleSheet("font-size: 40px;")
+        self.logo.setAlignment(Qt.AlignCenter)
         self.layout.addWidget(self.logo)
+        # Layout superior com os controles (barra de URL, SSH)
+        self.top_layout = QHBoxLayout()
+        self.top_layout.setContentsMargins(0, 0, 0, 0)
+        self.top_layout.setSpacing(5)
+
+        # Barra de URL
+        # self.url_label = QLabel("URL", self)
+        # self.url_label.setStyleSheet("color: black;")
+        # self.top_layout.addWidget(self.url_label)
+
+        self.url_bar = QLineEdit(self)
+        self.url_bar.setPlaceholderText("Digite a URL e pressione Enter")
+        self.url_bar.setStyleSheet("border: 2px solid #5c6bc0; border-radius: 10px;")
+        self.url_bar.returnPressed.connect(self.load_url)
+        self.top_layout.addWidget(self.url_bar)
+
+        # Entrada de SSH
+        # self.ssh_label = QLabel("USER@HOST", self)
+        # self.ssh_label.setStyleSheet("color: rgb(50, 50, 50)")
+        # self.top_layout.addWidget(self.ssh_label)
 
         self.ssh_target_entry = QLineEdit(self)
         self.ssh_target_entry.setPlaceholderText("user@host")
-        self.layout.addWidget(self.ssh_target_entry)
+        self.ssh_target_entry.setStyleSheet("border: 2px solid #5c6bc0; border-radius: 10px;")
+        self.top_layout.addWidget(self.ssh_target_entry)
 
-        self.connect_button = QPushButton("Connect", self)
+        # Botão de Conectar
+        self.connect_button = QPushButton("   Connect   ", self)
+        self.connect_button.setStyleSheet("border: none; font-weight: bold;")
         self.connect_button.clicked.connect(self.connect)
-        self.layout.addWidget(self.connect_button)
+        self.top_layout.addWidget(self.connect_button)
 
+        # Adiciona o layout superior com stretch 0 (tamanho mínimo)
+        self.layout.addLayout(self.top_layout, 0)
+
+        # Status (opcional, também com tamanho mínimo)
         self.status_label = QLabel("", self)
-        self.layout.addWidget(self.status_label)
+        self.status_label.setContentsMargins(0, 0, 0, 0)
+        self.layout.addWidget(self.status_label, 0)
 
-        # Barra de URL
-        self.url_bar = QLineEdit(self)
-        self.url_bar.setPlaceholderText("Enter URL and press Enter")
-        self.url_bar.returnPressed.connect(self.load_url)
-        self.layout.addWidget(self.url_bar)
-
+        # Browser ocupa o restante do espaço disponível (stretch 1)
         self.browser = QWebEngineView()
-        self.browser.urlChanged.connect(self.update_url_bar)
-        self.layout.addWidget(self.browser)
+        self.layout.addWidget(self.browser, 1)
 
         self.ssh_process = None
         self.proxy_port = 1080
@@ -73,8 +100,8 @@ class MaskNetApp(QMainWindow):
             )
 
             self.status_label.setText("SSH SOCKS5 tunnel started.")
-            self.browser.setUrl(QUrl("https://www.google.com"))
-            self.url_bar.setText("https://www.google.com")
+            self.browser.setUrl(QUrl(self.url_bar.text().strip()))
+            self.url_bar.setText(self.url_bar.text().strip())
             self.timer.start(5000)
 
         except Exception as e:
@@ -107,5 +134,5 @@ if __name__ == "__main__":
     os.environ["QTWEBENGINE_CHROMIUM_FLAGS"] = "--proxy-server=socks5://127.0.0.1:1080"
     app = QApplication(sys.argv)
     window = MaskNetApp()
-    window.show()
+    window.showMaximized()  # Maximiza a janela ao iniciar
     sys.exit(app.exec_())
