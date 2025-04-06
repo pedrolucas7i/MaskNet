@@ -38,7 +38,7 @@ class MaskNetApp(QMainWindow):
         # self.top_layout.addWidget(self.url_label)
 
         self.undo_button = QPushButton("◀", self)
-        self.undo_button.setStyleSheet("border: none; font-weight: bold;")
+        self.undo_button.setStyleSheet("border: none; font-weight: bold; background-color: #5c6bc0; color: white; padding: 0px 5px 2.5px 2.5px")
         self.undo_button.clicked.connect(self.undo_page)
         self.top_layout.addWidget(self.undo_button)
 
@@ -49,7 +49,7 @@ class MaskNetApp(QMainWindow):
         self.top_layout.addWidget(self.url_bar)
 
         self.forward_button = QPushButton("▶", self)
-        self.forward_button.setStyleSheet("border: none; font-weight: bold;")
+        self.forward_button.setStyleSheet("border: none; border font-weight: bold; background-color: #5c6bc0; color: white; padding: 0px 2.5px 2.5px 5px;")
         self.forward_button.clicked.connect(self.forward_page)
         self.top_layout.addWidget(self.forward_button)
 
