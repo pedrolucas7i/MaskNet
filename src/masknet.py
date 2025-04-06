@@ -37,11 +37,21 @@ class MaskNetApp(QMainWindow):
         # self.url_label.setStyleSheet("color: black;")
         # self.top_layout.addWidget(self.url_label)
 
+        self.undo_button = QPushButton("◀", self)
+        self.undo_button.setStyleSheet("border: none; font-weight: bold;")
+        self.undo_button.clicked.connect(self.undo_page)
+        self.top_layout.addWidget(self.undo_button)
+
         self.url_bar = QLineEdit(self)
         self.url_bar.setPlaceholderText("Digite a URL e pressione Enter")
         self.url_bar.setStyleSheet("border: 2px solid #5c6bc0; border-radius: 10px;")
         self.url_bar.returnPressed.connect(self.load_url)
         self.top_layout.addWidget(self.url_bar)
+
+        self.forward_button = QPushButton("▶", self)
+        self.forward_button.setStyleSheet("border: none; font-weight: bold;")
+        self.forward_button.clicked.connect(self.forward_page)
+        self.top_layout.addWidget(self.forward_button)
 
         # Entrada de SSH
         # self.ssh_label = QLabel("USER@HOST", self)
@@ -69,6 +79,7 @@ class MaskNetApp(QMainWindow):
 
         # Browser ocupa o restante do espaço disponível (stretch 1)
         self.browser = QWebEngineView()
+        self.browser.urlChanged.connect(self.update_url_bar)
         self.layout.addWidget(self.browser, 1)
 
         self.ssh_process = None
@@ -115,6 +126,15 @@ class MaskNetApp(QMainWindow):
 
     def update_url_bar(self, url):
         self.url_bar.setText(url.toString())
+
+    def undo_page(self):
+        if self.browser.history().canGoBack():
+            self.browser.back()
+
+    def forward_page(self):
+        if self.browser.history().canGoForward():
+            self.browser.forward()
+
 
     def check_connection(self):
         import socket
