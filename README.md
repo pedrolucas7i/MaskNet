@@ -82,7 +82,16 @@ python masknet.py
 
 ## 📸 Preview
 
-_Add screenshots or terminal usage examples here_
+
+![Screenshoot of MaskNet in Youtube.com](./screenshots/youtube.png)
+
+MaskNet being used to browse Youtube.com, watching videos and music...
+
+<br>
+
+![Screenshoot of MaskNet in Router Configs](./screenshots/router.png)
+
+MaskNet being used to access internet router settings from another network...
 
 ---
 
